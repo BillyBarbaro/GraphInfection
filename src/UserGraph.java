@@ -24,7 +24,7 @@ public class UserGraph {
     private HashMap<String, User> users;
 
     private UserGraph(Builder userGraphBuilder) {
-        this.users = new HashMap<>(userGraphBuilder.getUsers());
+        users = userGraphBuilder.getUsers();
     }
 
     public HashMap<String, User> getUsers() {
@@ -33,13 +33,13 @@ public class UserGraph {
 
     public void addUser(User user) {
         if (user != null) {
-            this.users.put(user.getUserName(), user);
+            users.put(user.getUserName(), user);
         }
     }
 
     public void removeUser(User user) {
         if (user != null) {
-            this.users.remove(user.getUserName());
+            users.remove(user.getUserName());
         }
     }
 
