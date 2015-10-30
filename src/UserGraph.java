@@ -42,4 +42,12 @@ public class UserGraph {
             this.users.remove(user.getUserName());
         }
     }
+
+    public void totalInfection(User userZero, Version newVersion) {
+        // TODO: write totalInfection(...)
+    }
+
+    public void limitedInfection(User userZero, Version newVersion, int desiredUsers) {
+        // TODO: write limitedInfection
+    }
 }
