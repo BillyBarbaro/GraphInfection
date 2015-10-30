@@ -1,9 +1,27 @@
 import java.util.LinkedList;
 
 public class User {
-    private Version version;
+
+    private final String userName;
+    private Version currentVersion;
     private LinkedList<User> coaches;
     private LinkedList<User> students;
+
+    public User(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public Version getCurrentVersion() {
+        return currentVersion;
+    }
+
+    public void setCurrentVersion(Version currentVersion) {
+        this.currentVersion = currentVersion;
+    }
 
     public void setStudents(LinkedList<User> students) {
         this.students = students;
