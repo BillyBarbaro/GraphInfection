@@ -1,4 +1,6 @@
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class UserGraph {
 
@@ -6,7 +8,7 @@ public class UserGraph {
         private HashMap<String, User> users = new HashMap<>();
 
         public Builder addUser(User user) {
-            if (user != null) {
+            if (user != null && !users.containsKey(user.getUserName())) {
                 users.put(user.getUserName(), user);
             }
             return this;
@@ -32,7 +34,7 @@ public class UserGraph {
     }
 
     public void addUser(User user) {
-        if (user != null) {
+        if (user != null && !users.containsKey(user.getUserName())) {
             users.put(user.getUserName(), user);
         }
     }
@@ -43,8 +45,27 @@ public class UserGraph {
         }
     }
 
+    public boolean isUserInGraph(User user) {
+        return users.containsKey(user.getUserName());
+    }
+
     public void totalInfection(User userZero, Version newVersion) {
-        // TODO: write totalInfection(...)
+        if (this.isUserInGraph(userZero)) {
+            Queue<User> infectQueue = new LinkedList<>();
+            infectQueue.add(userZero);
+
+            while (!infectQueue.isEmpty()) {
+                User currentUser = infectQueue.poll();
+                if (currentUser.getCurrentVersion().compareTo(newVersion) != 0) {
+                    currentUser.setCurrentVersion(newVersion);
+                    infectQueue.addAll(currentUser.getCoaches());
+                    infectQueue.addAll(currentUser.getStudents());
+                }
+            }
+        }
+        else {
+            throw new IllegalArgumentException("The specified user is not in the graph");
+        }
     }
 
     public void limitedInfection(User userZero, Version newVersion, int desiredUsers) {
