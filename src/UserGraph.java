@@ -49,14 +49,12 @@ public class UserGraph {
         return users.containsKey(user.getUserName());
     }
 
-    Queue<User> infectUser(User currentUser, Queue<User> infectQueue, Version newVersion) {
+    void infectUser(User currentUser, Queue<User> infectQueue, Version newVersion) {
         if (currentUser.getCurrentVersion().compareTo(newVersion) != 0) {
             currentUser.setCurrentVersion(newVersion);
             infectQueue.addAll(currentUser.getCoaches());
             infectQueue.addAll(currentUser.getStudents());
         }
-        // Returned for testing purposes.
-        return infectQueue;
     }
 
     public void totalInfection(User userZero, Version newVersion) {

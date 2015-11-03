@@ -2,6 +2,8 @@ import java.util.LinkedList;
 
 public class User {
 
+    private static final Version LATEST_VERSION = new Version(1, 0, 0);
+
     public static class Builder {
         private LinkedList<User> coaches = new LinkedList<>();
         private LinkedList<User> students = new LinkedList<>();
@@ -44,6 +46,7 @@ public class User {
 
     private User(String userName, Builder userBuilder) {
         this.userName = userName;
+        currentVersion = LATEST_VERSION;
         coaches = userBuilder.getCoaches();
         students = userBuilder.getStudents();
     }
