@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 public class Version implements Comparable<Version> {
 
     private Integer majorNumber;
@@ -48,5 +50,19 @@ public class Version implements Comparable<Version> {
             return revisionDifference;
         }
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Version) {
+            Version otherVersion = (Version)o;
+            boolean majorsEqual = this.getMajorNumber().equals(otherVersion.getMajorNumber());
+            boolean minorsEqual = this.getMinorNumber().equals(otherVersion.getMinorNumber());
+            boolean revisionsEqual = this.getRevisionNumber().equals(otherVersion.getRevisionNumber());
+            return majorsEqual && minorsEqual && revisionsEqual;
+        }
+        else {
+            return false;
+        }
     }
 }
