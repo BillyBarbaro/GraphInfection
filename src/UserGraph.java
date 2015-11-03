@@ -49,18 +49,24 @@ public class UserGraph {
         return users.containsKey(user.getUserName());
     }
 
+    Queue<User> infectUser(User currentUser, Queue<User> infectQueue, Version newVersion) {
+        if (currentUser.getCurrentVersion().compareTo(newVersion) != 0) {
+            currentUser.setCurrentVersion(newVersion);
+            infectQueue.addAll(currentUser.getCoaches());
+            infectQueue.addAll(currentUser.getStudents());
+        }
+        // Returned for testing purposes.
+        return infectQueue;
+    }
+
     public void totalInfection(User userZero, Version newVersion) {
-        if (this.isUserInGraph(userZero)) {
+        if (isUserInGraph(userZero)) {
             Queue<User> infectQueue = new LinkedList<>();
             infectQueue.add(userZero);
 
             while (!infectQueue.isEmpty()) {
                 User currentUser = infectQueue.poll();
-                if (currentUser.getCurrentVersion().compareTo(newVersion) != 0) {
-                    currentUser.setCurrentVersion(newVersion);
-                    infectQueue.addAll(currentUser.getCoaches());
-                    infectQueue.addAll(currentUser.getStudents());
-                }
+                infectUser(currentUser, infectQueue, newVersion);
             }
         }
         else {
