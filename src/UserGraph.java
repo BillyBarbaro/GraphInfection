@@ -53,23 +53,30 @@ public class UserGraph {
         return users.containsKey(user.getUserName());
     }
 
-    void infectUser(User currentUser, Queue<User> infectQueue, Version newVersion) {
-        if (currentUser.getCurrentVersion().compareTo(newVersion) != 0) {
-            currentUser.setCurrentVersion(newVersion);
-            infectQueue.addAll(currentUser.getCoaches());
-            infectQueue.addAll(currentUser.getStudents());
-        }
+    void updateQueue(User currentUser, Queue<User> infectQueue) {
+        infectQueue.addAll(currentUser.getCoaches());
+        infectQueue.addAll(currentUser.getStudents());
     }
 
-    public void totalInfection(User userZero, Version newVersion) {
+    void infectUser(User currentUser, Version newVersion) {
+        currentUser.setCurrentVersion(newVersion);
+    }
+
+    public int totalInfection(User userZero, Version newVersion) {
         if (isUserInGraph(userZero)) {
+            Integer infectCount = 0;
             Queue<User> infectQueue = new LinkedList<>();
             infectQueue.add(userZero);
 
             while (!infectQueue.isEmpty()) {
                 User currentUser = infectQueue.poll();
-                infectUser(currentUser, infectQueue, newVersion);
+                if (currentUser.getCurrentVersion().compareTo(newVersion) != 0) {
+                    updateQueue(currentUser, infectQueue);
+                    infectUser(currentUser, newVersion);
+                    infectCount++;
+                }
             }
+            return infectCount;
         }
         else {
             throw new IllegalArgumentException("The specified user is not in the graph");

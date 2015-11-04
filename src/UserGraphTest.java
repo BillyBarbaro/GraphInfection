@@ -31,37 +31,6 @@ public class UserGraphTest {
     }
 
     @Test
-    public void testInfectSingleUser() {
-        User user1 = new User.Builder().build("TestUser");
-        Queue<User> infectQueue = new LinkedList<>();
-        Version newVersion = new Version(1, 1, 1);
-
-        UserGraph testGraph = new UserGraph.Builder().addUser(user1).build();
-        testGraph.infectUser(user1, infectQueue, newVersion);
-
-        assertEquals("Version updated correctly", new Version(1, 1, 1), user1.getCurrentVersion());
-        assertEquals("No users added to queue", new LinkedList<User>(), infectQueue);
-    }
-
-    @Test
-    public void testInfectSeveralUsers() {
-        UserGraph testGraph = generateTestUserGraph();
-        testGraph.getUser("Student5").addStudent(testGraph.getUser("Student1"));
-
-        Queue<User> infectQueue = new LinkedList<>();
-        Version newVersion = new Version(1, 1, 1);
-
-        testGraph.infectUser(testGraph.getUser("Student5"), infectQueue, newVersion);
-
-        Queue<User> expectedQueue = new LinkedList<>();
-        expectedQueue.add(testGraph.getUser("Coach2"));
-        expectedQueue.add(testGraph.getUser("Student1"));
-
-        assertEquals("Version updated correctly", new Version(1, 1, 1), testGraph.getUser("Student5").getCurrentVersion());
-        assertEquals("No users added to queue", expectedQueue, infectQueue);
-    }
-
-    @Test
     public void testTotalInfection() {
         UserGraph testGraph = generateTestUserGraph();
         Version newVersion = new Version(1, 1, 1);
