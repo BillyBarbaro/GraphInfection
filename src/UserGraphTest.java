@@ -16,6 +16,7 @@ public class UserGraphTest {
         User student3 = new User.Builder().addCoach(coach1).addCoach(coach2).build("Student3");
         User student4 = new User.Builder().addCoach(coach2).build("Student4");
         User student5 = new User.Builder().addCoach(coach2).build("Student5");
+        User student6 = new User.Builder().build("Student6");
 
         return new UserGraph.Builder()
                 .addUser(coach1)
@@ -25,6 +26,7 @@ public class UserGraphTest {
                 .addUser(student3)
                 .addUser(student4)
                 .addUser(student5)
+                .addUser(student6)
                 .build();
     }
 
@@ -46,7 +48,6 @@ public class UserGraphTest {
         UserGraph testGraph = generateTestUserGraph();
         testGraph.getUser("Student5").addStudent(testGraph.getUser("Student1"));
 
-
         Queue<User> infectQueue = new LinkedList<>();
         Version newVersion = new Version(1, 1, 1);
 
@@ -58,5 +59,21 @@ public class UserGraphTest {
 
         assertEquals("Version updated correctly", new Version(1, 1, 1), testGraph.getUser("Student5").getCurrentVersion());
         assertEquals("No users added to queue", expectedQueue, infectQueue);
+    }
+
+    @Test
+    public void testTotalInfection() {
+        UserGraph testGraph = generateTestUserGraph();
+        Version newVersion = new Version(1, 1, 1);
+        testGraph.totalInfection(testGraph.getUser("Student1"), newVersion);
+        for (String username : testGraph.getUsers().keySet()) {
+            User user = testGraph.getUser(username);
+            if (!username.equals("Student6")) {
+                assertEquals("User not infected", new Version(1, 1, 1), user.getCurrentVersion());
+            }
+            else {
+                assertEquals("User infected but shouldn't be", new Version(1, 0, 0), user.getCurrentVersion());
+            }
+        }
     }
 }
