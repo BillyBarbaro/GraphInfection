@@ -64,24 +64,7 @@ public class UserGraph {
     }
 
     public int totalInfection(User userZero, Version newVersion) {
-        if (isUserInGraph(userZero)) {
-            Integer infectCount = 0;
-            Queue<User> infectQueue = new LinkedList<>();
-            infectQueue.add(userZero);
-
-            while (!infectQueue.isEmpty()) {
-                User currentUser = infectQueue.poll();
-                if (currentUser.getCurrentVersion().compareTo(newVersion) != 0) {
-                    updateQueue(currentUser, infectQueue);
-                    infectUser(currentUser, newVersion);
-                    infectCount++;
-                }
-            }
-            return infectCount;
-        }
-        else {
-            throw new IllegalArgumentException("The specified user is not in the graph");
-        }
+        return limitedInfection(userZero, newVersion, Integer.MAX_VALUE);
     }
 
     public int limitedInfection(User userZero, Version newVersion, Integer desiredUsers) {
