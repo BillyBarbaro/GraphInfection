@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -92,9 +93,11 @@ public class UserGraph {
             while (infectCount < desiredUsers && !infectQueue.isEmpty()) {
                 Queue<User> nextWave = new LinkedList<>();
                 for (User user : infectQueue) {
-                    updateQueue(user, nextWave);
-                    infectUser(user, newVersion);
-                    infectCount++;
+                    if (user.getCurrentVersion().compareTo(newVersion) != 0) {
+                        updateQueue(user, nextWave);
+                        infectUser(user, newVersion);
+                        infectCount++;
+                    }
                 }
                 infectQueue = nextWave;
             }
