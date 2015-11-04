@@ -11,6 +11,7 @@ public class User {
         public Builder addCoach(User user) {
             if (user != null) {
                 coaches.add(user);
+
             }
             return this;
         }
@@ -48,7 +49,13 @@ public class User {
         this.userName = userName;
         currentVersion = LATEST_VERSION;
         coaches = userBuilder.getCoaches();
+        for (User coach : coaches) {
+            coach.addStudentNotReciprocal(this);
+        }
         students = userBuilder.getStudents();
+        for (User student : students) {
+            student.addCoachNotReciprocal(this);
+        }
     }
 
     public String getUserName() {
@@ -67,23 +74,48 @@ public class User {
         return new LinkedList<>(students);
     }
 
-    public void addStudent(User newStudent) {
+    private void addStudentNotReciprocal(User newStudent) {
         students.add(newStudent);
     }
 
-    public void removeStudent(User student) {
+    public User addStudent(User newStudent) {
+        addStudentNotReciprocal(newStudent);
+        newStudent.addCoachNotReciprocal(this);
+        return this;
+    }
+
+    public User removeStudentNotReciprocal(User student) {
         students.remove(student);
+        return this;
+    }
+
+    public User removeStudent(User student) {
+        removeStudentNotReciprocal(student);
+        student.removeCoachNotReciprocal(this);
+        return this;
     }
 
     public LinkedList<User> getCoaches() {
         return new LinkedList<>(coaches);
     }
 
-    public void addCoach(User newCoach) {
+    private void addCoachNotReciprocal(User newCoach) {
         coaches.add(newCoach);
     }
 
-    public void removeCoach(User coach) {
+    public User addCoach(User newCoach) {
+        addCoachNotReciprocal(newCoach);
+        newCoach.addStudentNotReciprocal(this);
+        return this;
+    }
+
+    private void removeCoachNotReciprocal(User coach) {
         coaches.remove(coach);
+    }
+
+    public User removeCoach(User coach) {
+        removeCoachNotReciprocal(coach);
+        coach.removeStudentNotReciprocal(this);
+        return this;
     }
 }
