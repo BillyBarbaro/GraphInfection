@@ -118,4 +118,17 @@ public class User {
         coach.removeStudentNotReciprocal(this);
         return this;
     }
+
+    public String toString() {
+        return userName;
+    }
+
+    public boolean equals(Object o) {
+        if (o instanceof User) {
+            return ((User) o).getUserName().equals(this.getUserName());
+        }
+        else {
+            return false;
+        }
+    }
 }
