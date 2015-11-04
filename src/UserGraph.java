@@ -83,7 +83,25 @@ public class UserGraph {
         }
     }
 
-    public void limitedInfection(User userZero, Version newVersion, int desiredUsers) {
-        // TODO: write limitedInfection
+    public int limitedInfection(User userZero, Version newVersion, Integer desiredUsers) {
+        if (isUserInGraph(userZero)) {
+            Integer infectCount = 0;
+            Queue<User> infectQueue = new LinkedList<>();
+            infectQueue.add(userZero);
+
+            while (infectCount < desiredUsers && !infectQueue.isEmpty()) {
+                Queue<User> nextWave = new LinkedList<>();
+                for (User user : infectQueue) {
+                    updateQueue(user, nextWave);
+                    infectUser(user, newVersion);
+                    infectCount++;
+                }
+                infectQueue = nextWave;
+            }
+            return infectCount;
+        }
+        else {
+            throw new IllegalArgumentException("The specified user is not in the graph");
+        }
     }
 }
