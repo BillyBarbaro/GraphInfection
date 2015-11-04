@@ -45,6 +45,10 @@ public class UserGraph {
         }
     }
 
+    public User getUser(String username) {
+        return getUsers().get(username);
+    }
+
     public boolean isUserInGraph(User user) {
         return users.containsKey(user.getUserName());
     }
