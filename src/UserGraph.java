@@ -172,7 +172,7 @@ public class UserGraph {
 
             public SearchNode(SearchNode node) {
                 sum = node.getSum();
-                teams = node.getTeams();
+                teams = new ArrayList<>(node.getTeams());
             }
 
             public int getSum() {
@@ -188,7 +188,36 @@ public class UserGraph {
             }
         }
 
+        SearchNode nodes[] = new SearchNode[desiredUsersCount];
+        int largestFound = -1;
+        for (Team team : teams) {
+            nodes[team.getSize()] = new SearchNode(team);
+            for (int i = 0; i <= largestFound; i++) {
+                SearchNode currentNode = nodes[i];
+                if (currentNode != null) {
+                    int newSize = currentNode.getSum() + team.getSize();
+                    if (newSize == desiredUsersCount) {
+                        currentNode.addTeam(team);
+                        return currentNode.getTeams();
+                    }
+                    else if (nodes[newSize] != null && newSize < desiredUsersCount) {
+                        SearchNode newNode = new SearchNode(currentNode);
+                        newNode.addTeam(team);
+                        nodes[newSize] = newNode;
+                    }
+                    else {
+                        // There's already a way to sum to this. No need to recompute
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
+    private void infectTeams(List<Team> toInfect, Version newVersion) {
+        for (Team team : toInfect) {
+            totalInfection(team.getTeamMembers().get(0), newVersion);
+        }
     }
 
     public boolean totalInfectionExact(Version newVersion, int desiredUsersCount) {
@@ -202,5 +231,9 @@ public class UserGraph {
         }
 
         List<Team> toInfect = findInfectList(teams, desiredUsersCount);
+        if (toInfect != null) {
+            infectTeams(toInfect, newVersion);
+        }
+        return toInfect != null;
     }
 }
