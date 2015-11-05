@@ -5,12 +5,11 @@ public class Team {
     private LinkedList<User> teamMembers;
 
 
-    public Team(LinkedList<User> teamMembers) {
-        this.teamMembers = teamMembers;
+    public Team() {
     }
 
     public LinkedList<User> getTeamMembers() {
-        return teamMembers;
+        return new LinkedList<>(teamMembers);
     }
 
     public void addTeamMember(User newMember) {

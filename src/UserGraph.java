@@ -1,3 +1,5 @@
+import org.junit.Test;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -78,9 +80,9 @@ public class UserGraph {
         return userNodes.containsKey(user.getUserName());
     }
 
-    void updateQueue(User currentUser, Queue<User> infectQueue) {
-        infectQueue.addAll(currentUser.getCoaches());
-        infectQueue.addAll(currentUser.getStudents());
+    void updateQueue(User currentUser, Queue<User> queue) {
+        queue.addAll(currentUser.getCoaches());
+        queue.addAll(currentUser.getStudents());
     }
 
     void infectUser(User currentUser, Version newVersion) {
@@ -113,5 +115,40 @@ public class UserGraph {
         else {
             throw new IllegalArgumentException("The specified user is not in the graph");
         }
+    }
+
+    private void resetTeams() {
+        for (UserNode node : userNodes.values()) {
+            node.setHasTeam(false);
+        }
+    }
+
+    private Team createTeam(User firstUser) {
+        Team team = new Team();
+
+        Queue<User> teamQueue = new LinkedList<>();
+        teamQueue.add(firstUser);
+
+        while (!teamQueue.isEmpty()) {
+            for (User user : teamQueue) {
+                if (isUserInGraph(user) && !userNodes.get(user.getUserName()).hasTeam()) {
+                    team.addTeamMember(user);
+                    updateQueue(user, teamQueue);
+                    userNodes.get(user.getUserName()).setHasTeam(true);
+                }
+            }
+        }
+        return team;
+    }
+
+    public LinkedList<Team> findTeams() {
+        resetTeams();
+        LinkedList<Team> teams = new LinkedList<>();
+        for (UserNode node : userNodes.values()) {
+            if (!node.hasTeam()) {
+                teams.add(createTeam(node.getUser()));
+            }
+        }
+        return teams;
     }
 }
