@@ -1,5 +1,7 @@
 import org.junit.Test;
 
+import java.util.LinkedList;
+
 import static org.junit.Assert.*;
 
 public class UserGraphTest {
@@ -144,5 +146,13 @@ public class UserGraphTest {
         assertEquals("User infected but shouldn't be", new Version(1, 0, 0), testGraph.getUser("Student6").getCurrentVersion());
         assertEquals("User not infected", new Version(1, 1, 1), testGraph.getUser("Coach1").getCurrentVersion());
         assertEquals("User infected but shouldn't be", new Version(1, 0, 0), testGraph.getUser("Coach2").getCurrentVersion());
+    }
+
+    @Test
+    public void testTeamsDefault() {
+        UserGraph testGraph = generateTestUserGraph();
+        LinkedList<Team> teams = testGraph.findTeams();
+
+        assertEquals("Incorrect Number of Teams", 2, teams.size());
     }
 }

@@ -38,7 +38,7 @@ public class UserGraph {
         }
 
         public void setHasTeam(boolean assigned) {
-            hasTeam = false;
+            hasTeam = assigned;
         }
 
         public User getUser() {
@@ -130,12 +130,11 @@ public class UserGraph {
         teamQueue.add(firstUser);
 
         while (!teamQueue.isEmpty()) {
-            for (User user : teamQueue) {
-                if (isUserInGraph(user) && !userNodes.get(user.getUserName()).hasTeam()) {
-                    team.addTeamMember(user);
-                    updateQueue(user, teamQueue);
-                    userNodes.get(user.getUserName()).setHasTeam(true);
-                }
+            User user = teamQueue.poll();
+            if (isUserInGraph(user) && !userNodes.get(user.getUserName()).hasTeam()) {
+                team.addTeamMember(user);
+                updateQueue(user, teamQueue);
+                userNodes.get(user.getUserName()).setHasTeam(true);
             }
         }
         return team;

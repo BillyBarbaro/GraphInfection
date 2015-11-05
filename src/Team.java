@@ -6,6 +6,7 @@ public class Team {
 
 
     public Team() {
+        teamMembers = new LinkedList<>();
     }
 
     public LinkedList<User> getTeamMembers() {
