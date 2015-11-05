@@ -58,6 +58,13 @@ public class User {
         }
     }
 
+    User(User user) {
+        this.userName = user.getUserName();
+        this.currentVersion =user.getCurrentVersion();
+        this.coaches = user.getCoaches();
+        this.students = user.getStudents();
+    }
+
     public String getUserName() {
         return userName;
     }
