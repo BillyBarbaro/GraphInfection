@@ -1,8 +1,7 @@
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class UserGraph {
 
@@ -55,7 +54,7 @@ public class UserGraph {
     public HashMap<String, User> getUsers() {
         HashMap<String, User> users = new HashMap<>();
         for (String userName : userNodes.keySet()) {
-            users.put(userName, new User(userNodes.get(userName).getUser()));
+            users.put(userName, userNodes.get(userName).getUser());
         }
         return users;
     }
@@ -140,14 +139,68 @@ public class UserGraph {
         return team;
     }
 
-    public LinkedList<Team> findTeams() {
+    public ArrayList<Team> findTeams() {
         resetTeams();
-        LinkedList<Team> teams = new LinkedList<>();
+        ArrayList<Team> teams = new ArrayList<>();
         for (UserNode node : userNodes.values()) {
             if (!node.hasTeam()) {
                 teams.add(createTeam(node.getUser()));
             }
         }
         return teams;
+    }
+
+    private List<Team> removeLargerValues(List<Team> teams, int maxValue) {
+        for (int i = teams.size() - 1; i >= 0; i--) {
+            if (teams.get(i).getSize() <= maxValue) {
+                return teams.subList(0, i);
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    private List<Team> findInfectList(List<Team> teams, int desiredUsersCount) {
+        class SearchNode {
+            int sum;
+            List<Team> teams;
+
+            public SearchNode(Team initialTeam) {
+                sum = 0;
+                teams = new LinkedList<>();
+                addTeam(initialTeam);
+            }
+
+            public SearchNode(SearchNode node) {
+                sum = node.getSum();
+                teams = node.getTeams();
+            }
+
+            public int getSum() {
+                return sum;
+            }
+
+            public void addTeam(Team newTeam) {
+                sum += newTeam.getSize();
+                teams.add(newTeam);
+            }
+            public List<Team> getTeams() {
+                return teams;
+            }
+        }
+
+
+    }
+
+    public boolean totalInfectionExact(Version newVersion, int desiredUsersCount) {
+        ArrayList<Team> allTeams = findTeams();
+        Collections.sort(allTeams, (team1, team2) -> team1.getSize() - team2.getSize());
+        List<Team> teams = removeLargerValues(allTeams, desiredUsersCount);
+        // The trivial case where there is a team of the desired size.
+        if (teams.get(teams.size() - 1).getSize() == desiredUsersCount) {
+            totalInfection(teams.get(teams.size() - 1).getTeamMembers().get(0), newVersion);
+            return true;
+        }
+
+        List<Team> toInfect = findInfectList(teams, desiredUsersCount);
     }
 }
