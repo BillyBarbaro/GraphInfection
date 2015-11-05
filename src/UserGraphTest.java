@@ -1,6 +1,6 @@
 import org.junit.Test;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 
@@ -151,7 +151,7 @@ public class UserGraphTest {
     @Test
     public void testTeamsDefault() {
         UserGraph testGraph = generateTestUserGraph();
-        LinkedList<Team> teams = testGraph.findTeams();
+        ArrayList<Team> teams = testGraph.findTeams();
 
         assertEquals("Incorrect Number of Teams", 2, teams.size());
         Team team1 = new Team();
@@ -177,5 +177,37 @@ public class UserGraphTest {
         else {
             fail("Teams partitioned incorrectly");
         }
+    }
+
+    @Test
+    public void testInfectExactUnreachable() {
+        UserGraph testGraph = generateTestUserGraph();
+        Version newVersion = new Version(1, 1, 1);
+
+        assertFalse("Total Infect Exact Incorrect", testGraph.totalInfectionExact(newVersion, 3));
+    }
+
+    @Test
+    public void testInfectExactAbovePossible() {
+        UserGraph testGraph = generateTestUserGraph();
+        Version newVersion = new Version(1, 1, 1);
+
+        assertFalse("Total Infect Exact Incorrect", testGraph.totalInfectionExact(newVersion, 9));
+    }
+
+    @Test
+    public void testInfectExactTeamOfCorrectSize() {
+        UserGraph testGraph = generateTestUserGraph();
+        Version newVersion = new Version(1, 1, 1);
+
+        assertTrue("Total Infect Exact Incorrect", testGraph.totalInfectionExact(newVersion, 7));
+    }
+
+    @Test
+    public void testInfectExactAllTeamsNeeded() {
+        UserGraph testGraph = generateTestUserGraph();
+        Version newVersion = new Version(1, 1, 1);
+
+        assertTrue("Total Infect Exact Incorrect", testGraph.totalInfectionExact(newVersion, 8));
     }
 }

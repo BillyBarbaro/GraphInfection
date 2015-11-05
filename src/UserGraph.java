@@ -153,7 +153,7 @@ public class UserGraph {
     private List<Team> removeLargerValues(List<Team> teams, int maxValue) {
         for (int i = teams.size() - 1; i >= 0; i--) {
             if (teams.get(i).getSize() <= maxValue) {
-                return teams.subList(0, i);
+                return teams.subList(0, i+1);
             }
         }
         return new ArrayList<>();
@@ -189,18 +189,17 @@ public class UserGraph {
         }
 
         SearchNode nodes[] = new SearchNode[desiredUsersCount];
-        int largestFound = -1;
         for (Team team : teams) {
             nodes[team.getSize()] = new SearchNode(team);
-            for (int i = 0; i <= largestFound; i++) {
+            for (int i = 0; i < nodes.length; i++) {
                 SearchNode currentNode = nodes[i];
-                if (currentNode != null) {
+                if (currentNode != null && i != team.getSize()) {
                     int newSize = currentNode.getSum() + team.getSize();
                     if (newSize == desiredUsersCount) {
                         currentNode.addTeam(team);
                         return currentNode.getTeams();
                     }
-                    else if (nodes[newSize] != null && newSize < desiredUsersCount) {
+                    else if (newSize <= desiredUsersCount && nodes[newSize] == null) {
                         SearchNode newNode = new SearchNode(currentNode);
                         newNode.addTeam(team);
                         nodes[newSize] = newNode;
@@ -224,6 +223,12 @@ public class UserGraph {
         ArrayList<Team> allTeams = findTeams();
         Collections.sort(allTeams, (team1, team2) -> team1.getSize() - team2.getSize());
         List<Team> teams = removeLargerValues(allTeams, desiredUsersCount);
+
+        // The trivial case where each individual team is larger than the desired number of infections
+        if (teams.size() == 0) {
+            return false;
+        }
+
         // The trivial case where there is a team of the desired size.
         if (teams.get(teams.size() - 1).getSize() == desiredUsersCount) {
             totalInfection(teams.get(teams.size() - 1).getTeamMembers().get(0), newVersion);
