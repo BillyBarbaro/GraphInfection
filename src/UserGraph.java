@@ -1,22 +1,21 @@
 import java.util.HashMap;
-import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class UserGraph {
 
     public static class Builder {
-        private HashMap<String, User> users = new HashMap<>();
+        private HashMap<String, UserNode> userNodes = new HashMap<>();
 
         public Builder addUser(User user) {
-            if (user != null && !users.containsKey(user.getUserName())) {
-                users.put(user.getUserName(), user);
+            if (user != null && !userNodes.containsKey(user.getUserName())) {
+                userNodes.put(user.getUserName(), new UserNode(user));
             }
             return this;
         }
 
-        public HashMap<String, User> getUsers() {
-            return new HashMap<>(users);
+        public HashMap<String, UserNode> getUserNodes() {
+            return new HashMap<>(userNodes);
         }
 
         public UserGraph build() {
@@ -24,34 +23,59 @@ public class UserGraph {
         }
     }
 
-    private HashMap<String, User> users;
+    private static class UserNode {
+        private final User user;
+        private boolean hasTeam;
+
+        public UserNode(User user) {
+            this.user = user;
+        }
+
+        public boolean hasTeam() {
+            return hasTeam;
+        }
+
+        public void setHasTeam(boolean assigned) {
+            hasTeam = false;
+        }
+
+        public User getUser() {
+            return user;
+        }
+    }
+
+    private HashMap<String, UserNode> userNodes;
 
     private UserGraph(Builder userGraphBuilder) {
-        users = userGraphBuilder.getUsers();
+        userNodes = userGraphBuilder.getUserNodes();
     }
 
     public HashMap<String, User> getUsers() {
-        return new HashMap<>(users);
+        HashMap<String, User> users = new HashMap<>();
+        for (String userName : userNodes.keySet()) {
+            users.put(userName, new User(userNodes.get(userName).getUser()));
+        }
+        return users;
     }
 
     public void addUser(User user) {
-        if (user != null && !users.containsKey(user.getUserName())) {
-            users.put(user.getUserName(), user);
+        if (user != null && !userNodes.containsKey(user.getUserName())) {
+            userNodes.put(user.getUserName(), new UserNode(user));
         }
     }
 
     public void removeUser(User user) {
         if (user != null) {
-            users.remove(user.getUserName());
+            userNodes.remove(user.getUserName());
         }
     }
 
     public User getUser(String username) {
-        return getUsers().get(username);
+        return userNodes.get(username).getUser();
     }
 
     public boolean isUserInGraph(User user) {
-        return users.containsKey(user.getUserName());
+        return userNodes.containsKey(user.getUserName());
     }
 
     void updateQueue(User currentUser, Queue<User> infectQueue) {
@@ -76,7 +100,7 @@ public class UserGraph {
             while (infectCount < desiredUsers && !infectQueue.isEmpty()) {
                 Queue<User> nextWave = new LinkedList<>();
                 for (User user : infectQueue) {
-                    if (user.getCurrentVersion().compareTo(newVersion) != 0) {
+                    if (isUserInGraph(user) && user.getCurrentVersion().compareTo(newVersion) != 0) {
                         updateQueue(user, nextWave);
                         infectUser(user, newVersion);
                         infectCount++;
