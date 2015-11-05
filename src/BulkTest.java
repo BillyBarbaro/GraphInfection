@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class BulkTest {
@@ -37,16 +38,18 @@ public class BulkTest {
         UserGraph testGraph = new UserGraph.Builder().build();
 
         for (int i = 0; i < NUMBER_OF_TEAMS; i++) {
-            System.out.println("Creating team " + i);
             addTeamToGraph(testGraph, i);
         }
 
-        // Partition into Teams
+        ArrayList<Team> teams = testGraph.findTeams();
 
-        // Run a partial infection on the graph
+        System.out.println("Desired\tActual\tRatio");
+        for (Team team : teams) {
+            int desiredInfected = ThreadLocalRandom.current().nextInt(1, team.getSize() + 1);
+            int actualInfected = testGraph.limitedInfection(team.getTeamMembers().get(0), new Version(1, 1, 1), desiredInfected);
+            System.out.println(desiredInfected + "\t" + actualInfected + "\t" + (float)actualInfected/desiredInfected);
 
-        // Check how close the returned infection is to the desired
-
-        // Check student to teacher same version ratio.
+            // Check student to teacher same version ratio.
+        }
     }
 }
