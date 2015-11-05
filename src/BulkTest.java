@@ -3,6 +3,8 @@ import java.util.Random;
 
 public class BulkTest {
 
+    private static final boolean PRINT_RESULTS = false;
+
     private static final int NUMBER_OF_TEAMS = 500;
 
     private static final int MIN_NUMBER_COACHES = 8;
@@ -48,14 +50,15 @@ public class BulkTest {
 
         ArrayList<Team> teams = testGraph.findTeams();
         ArrayList<Double> ratios = new ArrayList<>();
+        ArrayList<Double> incorrectVersion = new ArrayList<>();
 
-        System.out.println("Desired\tActual\tRatio");
+        if (PRINT_RESULTS) System.out.println("Desired\tActual\tRatio");
         for (Team team : teams) {
             Version newVersion = new Version(1, 1, 1);
             int desiredInfected = getRandom(1, team.getSize());
             int actualInfected = testGraph.limitedInfection(team.getTeamMembers().get(0), newVersion, desiredInfected);
             ratios.add((double) actualInfected / desiredInfected);
-            //System.out.println(desiredInfected + "\t" + actualInfected + "\t" + (double)actualInfected/desiredInfected);
+            if (PRINT_RESULTS) System.out.println(desiredInfected + "\t" + actualInfected + "\t" + (double) actualInfected/desiredInfected);
 
             for (User user : team.getTeamMembers()) {
                 if (user.getUserName().contains("Coach")) {
@@ -65,11 +68,19 @@ public class BulkTest {
                             upgraded++;
                         }
                     }
-                    System.out.println(user.getStudents().size()-upgraded + "\t" + upgraded + "\t" + (double)upgraded/user.getStudents().size());
-
+                    if (user.getStudents().size() != 0) {
+                        if (upgraded > user.getStudents().size() / 2) {
+                            incorrectVersion.add((user.getStudents().size() - upgraded) / (double) user.getStudents().size());
+                        } else {
+                            incorrectVersion.add(upgraded / (double) user.getStudents().size());
+                        }
+                        if (PRINT_RESULTS)
+                            System.out.println(user.getStudents().size() - upgraded + "\t" + upgraded + "\t" + (double) upgraded / user.getStudents().size());
+                    }
                 }
             }
         }
         System.out.println("Average ratio of actual to desired: " + (ratios.stream().mapToDouble(a -> a).average()).getAsDouble());
+        System.out.println("Average percentage of students per class with the wrong version: " + (incorrectVersion.stream().mapToDouble(a -> a).average()).getAsDouble());
     }
 }
