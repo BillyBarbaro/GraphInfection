@@ -1,5 +1,4 @@
 import java.util.LinkedList;
-import java.util.Objects;
 
 public class Team {
 

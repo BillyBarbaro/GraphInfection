@@ -1,5 +1,3 @@
-import java.util.Objects;
-
 public class Version implements Comparable<Version> {
 
     private Integer majorNumber;
