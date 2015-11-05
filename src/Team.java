@@ -1,4 +1,5 @@
 import java.util.LinkedList;
+import java.util.Objects;
 
 public class Team {
 
@@ -19,5 +20,14 @@ public class Team {
 
     public int getSize() {
         return teamMembers.size();
+    }
+
+    public boolean equals(Object o) {
+        if (o instanceof Team) {
+            return ((Team) o).getTeamMembers().equals(this.getTeamMembers());
+        }
+        else {
+            return false;
+        }
     }
 }

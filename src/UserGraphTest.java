@@ -154,5 +154,28 @@ public class UserGraphTest {
         LinkedList<Team> teams = testGraph.findTeams();
 
         assertEquals("Incorrect Number of Teams", 2, teams.size());
+        Team team1 = new Team();
+        team1.addTeamMember(testGraph.getUser("Student3"));
+        team1.addTeamMember(testGraph.getUser("Coach1"));
+        team1.addTeamMember(testGraph.getUser("Coach2"));
+        team1.addTeamMember(testGraph.getUser("Student1"));
+        team1.addTeamMember(testGraph.getUser("Student2"));
+        team1.addTeamMember(testGraph.getUser("Student4"));
+        team1.addTeamMember(testGraph.getUser("Student5"));
+
+        Team team2 = new Team();
+        team2.addTeamMember(testGraph.getUser("Student6"));
+
+        if (teams.get(0).getSize() == 7) {
+            assertEquals("Team incorrect", team1, teams.get(0));
+            assertEquals("Team incorrect", team2, teams.get(1));
+        }
+        else if (teams.get(0).getSize() == 1) {
+            assertEquals("Team incorrect", team1, teams.get(1));
+            assertEquals("Team incorrect", team2, teams.get(0));
+        }
+        else {
+            fail("Teams partitioned incorrectly");
+        }
     }
 }
