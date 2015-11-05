@@ -42,14 +42,17 @@ public class BulkTest {
         }
 
         ArrayList<Team> teams = testGraph.findTeams();
+        ArrayList<Double> ratios = new ArrayList<>();
 
         System.out.println("Desired\tActual\tRatio");
         for (Team team : teams) {
             int desiredInfected = ThreadLocalRandom.current().nextInt(1, team.getSize() + 1);
             int actualInfected = testGraph.limitedInfection(team.getTeamMembers().get(0), new Version(1, 1, 1), desiredInfected);
-            System.out.println(desiredInfected + "\t" + actualInfected + "\t" + (float)actualInfected/desiredInfected);
+            ratios.add((double)actualInfected/desiredInfected);
+            System.out.println(desiredInfected + "\t" + actualInfected + "\t" + (double)actualInfected/desiredInfected);
 
             // Check student to teacher same version ratio.
         }
+        System.out.println("Average ratio of actual to desired: " + (ratios.stream().mapToDouble(a -> a).average()).getAsDouble());
     }
 }
