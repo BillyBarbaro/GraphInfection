@@ -190,10 +190,9 @@ public class UserGraph {
 
         SearchNode nodes[] = new SearchNode[desiredUsersCount];
         for (Team team : teams) {
-            nodes[team.getSize()] = new SearchNode(team);
             for (int i = 0; i < nodes.length; i++) {
                 SearchNode currentNode = nodes[i];
-                if (currentNode != null && i != team.getSize()) {
+                if (currentNode != null) {
                     int newSize = currentNode.getSum() + team.getSize();
                     if (newSize == desiredUsersCount) {
                         currentNode.addTeam(team);
@@ -209,6 +208,7 @@ public class UserGraph {
                     }
                 }
             }
+            nodes[team.getSize()] = new SearchNode(team);
         }
         return null;
     }

@@ -29,6 +29,30 @@ public class UserGraphTest {
                 .build();
     }
 
+    private UserGraph generateTestPairsGraph() {
+        User coach1 = new User.Builder().build("Coach1");
+        User coach2 = new User.Builder().build("Coach2");
+        User coach3 = new User.Builder().build("Coach3");
+        User coach4 = new User.Builder().build("Coach4");
+
+        User student1 = new User.Builder().addCoach(coach1).build("Student1");
+        User student2 = new User.Builder().addCoach(coach2).build("Student2");
+        User student3 = new User.Builder().addCoach(coach3).build("Student3");
+        User student4 = new User.Builder().addCoach(coach4).build("Student4");
+
+
+        return new UserGraph.Builder()
+                .addUser(coach1)
+                .addUser(coach2)
+                .addUser(coach3)
+                .addUser(coach4)
+                .addUser(student1)
+                .addUser(student2)
+                .addUser(student3)
+                .addUser(student4)
+                .build();
+    }
+
     @Test
     public void testTotalInfection() {
         UserGraph testGraph = generateTestUserGraph();
@@ -206,6 +230,20 @@ public class UserGraphTest {
     @Test
     public void testInfectExactAllTeamsNeeded() {
         UserGraph testGraph = generateTestUserGraph();
+        Version newVersion = new Version(1, 1, 1);
+
+        assertTrue("Total Infect Exact Incorrect", testGraph.totalInfectionExact(newVersion, 8));
+    }
+
+    @Test public void testInfectExactSeveralGroupsFaliure() {
+        UserGraph testGraph = generateTestPairsGraph();
+        Version newVersion = new Version(1, 1, 1);
+
+        assertFalse("Total Infect Exact Incorrect", testGraph.totalInfectionExact(newVersion, 3));
+    }
+
+    @Test public void testInfectExactSeveralGroupsSuccess() {
+        UserGraph testGraph = generateTestPairsGraph();
         Version newVersion = new Version(1, 1, 1);
 
         assertTrue("Total Infect Exact Incorrect", testGraph.totalInfectionExact(newVersion, 8));
