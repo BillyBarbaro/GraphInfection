@@ -1,9 +1,11 @@
 import java.util.LinkedList;
 
+/*
+    This class represents a connected group of Users.  Given any user in the group, all others can be reached.
+ */
 public class Team {
 
     private LinkedList<User> teamMembers;
-
 
     public Team() {
         teamMembers = new LinkedList<>();
