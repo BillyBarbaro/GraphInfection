@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class BulkTest {
@@ -53,47 +54,88 @@ public class BulkTest {
         }
     }
 
-    public static void main(String args[]) {
+    private static UserGraph createRandomGraph(int size) {
         UserGraph testGraph = new UserGraph.Builder().build();
 
         // Adds the specified number of random teams to the graph
-        for (int i = 0; i < NUMBER_OF_TEAMS; i++) {
+        for (int i = 0; i < size; i++) {
             addRandomTeamToGraph(testGraph, i);
         }
+        return testGraph;
+    }
+
+    public static void main(String args[]) {
+
+        UserGraph testGraph = createRandomGraph(NUMBER_OF_TEAMS);
 
         ArrayList<Team> teams = testGraph.findTeams();
-        ArrayList<Double> ratios = new ArrayList<>();
-        ArrayList<Double> incorrectVersion = new ArrayList<>();
+        ArrayList<Double> infectionRatios = new ArrayList<>();
+        ArrayList<Double> alternateVersionRatio = new ArrayList<>();
 
         if (PRINT_RESULTS) System.out.println("Desired\tActual\tRatio");
         for (Team team : teams) {
-            Version newVersion = new Version(1, 1, 1);
-            int desiredInfected = getRandom(1, team.getSize());
-            int actualInfected = testGraph.limitedInfection(team.getTeamMembers().get(0), newVersion, desiredInfected);
-            ratios.add((double) actualInfected / desiredInfected);
-            if (PRINT_RESULTS) System.out.println(desiredInfected + "\t" + actualInfected + "\t" + (double) actualInfected/desiredInfected);
+            analyzeTeam(testGraph, infectionRatios, alternateVersionRatio, team);
+        }
+        System.out.println("Average ratio of actual to desired: " +
+                (infectionRatios.stream().mapToDouble(a -> a).average()).getAsDouble());
+        System.out.println("Average percentage of students per class with the wrong version: " + (
+                alternateVersionRatio.stream().mapToDouble(a -> a).average()).getAsDouble());
+    }
 
-            for (User user : team.getTeamMembers()) {
-                if (user.getUserName().contains("Coach")) {
-                    int upgraded = 0;
-                    for (User student : user.getStudents()) {
-                        if (student.getCurrentVersion().equals(newVersion)) {
-                            upgraded++;
-                        }
-                    }
-                    if (user.getStudents().size() != 0) {
-                        if (upgraded > user.getStudents().size() / 2) {
-                            incorrectVersion.add((user.getStudents().size() - upgraded) / (double) user.getStudents().size());
-                        } else {
-                            incorrectVersion.add(upgraded / (double) user.getStudents().size());
-                        }
-                        if (PRINT_RESULTS)
-                            System.out.println(user.getStudents().size() - upgraded + "\t" + upgraded + "\t" + (double) upgraded / user.getStudents().size());
-                    }
-                }
+    // Infects a team and gathers data on them.  Then gathers data from individual coaches.
+    private static void analyzeTeam(UserGraph testGraph, ArrayList<Double> infectionRatios, ArrayList<Double> alternateVersionRatio, Team team) {
+        Version newVersion = new Version(1, 1, 1);
+
+        gatherPartialInfectionData(testGraph, infectionRatios, team, newVersion);
+
+        gatherTeamData(alternateVersionRatio, team, newVersion);
+    }
+
+    // Gathers data about how close the number of users infected by partial infection is to the desired number
+    private static void gatherPartialInfectionData(UserGraph testGraph, ArrayList<Double> infectionRatios, Team team, Version newVersion) {
+        int desiredInfected = getRandom(1, team.getSize());
+        int actualInfected = testGraph.limitedInfection(team.getTeamMembers().get(0), newVersion, desiredInfected);
+        infectionRatios.add((double) actualInfected / desiredInfected);
+
+        if (PRINT_RESULTS){
+            System.out.println(desiredInfected + "\t" + actualInfected + "\t" + (double) actualInfected/desiredInfected);
+        }
+    }
+
+    // After the team has been infected, check how many students of each coach are infected.
+    private static void gatherTeamData(ArrayList<Double> alternateVersionRatio, Team team, Version newVersion) {
+        for (User user : team.getTeamMembers()) {
+            if (user.getUserName().contains("Coach")) {
+                gatherClassData(alternateVersionRatio, newVersion, user);
             }
         }
-        System.out.println("Average ratio of actual to desired: " + (ratios.stream().mapToDouble(a -> a).average()).getAsDouble());
-        System.out.println("Average percentage of students per class with the wrong version: " + (incorrectVersion.stream().mapToDouble(a -> a).average()).getAsDouble());
+    }
+
+    private static void gatherClassData(ArrayList<Double> alternateVersionRatio, Version newVersion, User coach) {
+        int upgraded = countUsersWithVersion(newVersion, coach.getStudents());
+        if (coach.getStudents().size() != 0) {
+            /* Determine what version the majority of the class is running and calcuate the ratio of the class on the
+                alternate version
+            */
+            if (upgraded > coach.getStudents().size() / 2) {
+                alternateVersionRatio.add((coach.getStudents().size() - upgraded) / (double) coach.getStudents().size());
+            } else {
+                alternateVersionRatio.add(upgraded / (double) coach.getStudents().size());
+            }
+            
+            if (PRINT_RESULTS) {
+                System.out.println(coach.getStudents().size() - upgraded + "\t" + upgraded + "\t" + (double) upgraded / coach.getStudents().size());
+            }
+        }
+    }
+
+    private static int countUsersWithVersion(Version newVersion, List<User> users) {
+        int upgraded = 0;
+        for (User student : users) {
+            if (student.getCurrentVersion().equals(newVersion)) {
+                upgraded++;
+            }
+        }
+        return upgraded;
     }
 }
