@@ -1,5 +1,6 @@
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class VersionTest {
@@ -34,5 +35,11 @@ public class VersionTest {
         Version v2 = new Version(4, 3, 3);
         assertTrue("Major comparison incorrect", v1.compareTo(v2) > 0);
         assertTrue("Major comparison incorrect", v2.compareTo(v1) < 0);
+    }
+
+    @Test
+    public void testToString() {
+        Version v1 = new Version(4, 3, 9);
+        assertEquals("Incorrect version printed", "4.3.9", v1.toString());
     }
 }
