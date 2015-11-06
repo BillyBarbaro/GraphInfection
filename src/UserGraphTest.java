@@ -235,7 +235,7 @@ public class UserGraphTest {
         assertTrue("Total Infect Exact Incorrect", testGraph.totalInfectionExact(newVersion, 8));
     }
 
-    @Test public void testInfectExactSeveralGroupsFaliure() {
+    @Test public void testInfectExactSeveralGroupsFailure() {
         UserGraph testGraph = generateTestPairsGraph();
         Version newVersion = new Version(1, 1, 1);
 

@@ -93,7 +93,13 @@ public class UserGraph {
         return limitedInfection(userZero, newVersion, Integer.MAX_VALUE);
     }
 
-    /* Proceeds in waves out from the inital user until the threshold is met or there or no more connected users to
+    // Infect all members of a given team.
+    public int totalInfection(Team team, Version newVersion) {
+        User userZero = team.getTeamMembers().get(0);
+        return limitedInfection(userZero, newVersion, Integer.MAX_VALUE);
+    }
+
+    /* Proceeds in waves out from the initial user until the threshold is met or there or no more connected users to
         infect.  Returns the number of users it infected.
     */
     public int limitedInfection(User userZero, Version newVersion, Integer desiredUsers) {
@@ -187,10 +193,9 @@ public class UserGraph {
         return team;
     }
 
+    // Given a version and exact count, returns true if exactly that number of users was infected.
     public boolean totalInfectionExact(Version newVersion, int desiredUsersCount) {
-        ArrayList<Team> allTeams = findTeams();
-        Collections.sort(allTeams, (team1, team2) -> team1.getSize() - team2.getSize());
-        List<Team> teams = removeLargerValues(allTeams, desiredUsersCount);
+        List<Team> teams = getTeamsSmallerThan(desiredUsersCount);
 
         // The trivial case where each individual team is larger than the desired number of infections
         if (teams.size() == 0) {
@@ -210,7 +215,15 @@ public class UserGraph {
         return toInfect != null;
     }
 
-    private List<Team> removeLargerValues(List<Team> teams, int maxValue) {
+    // Returns a list of all teams with less members than the input desired count
+    private List<Team> getTeamsSmallerThan(int teamSize) {
+        ArrayList<Team> allTeams = findTeams();
+        Collections.sort(allTeams, (team1, team2) -> team1.getSize() - team2.getSize());
+        return removeLargerTeams(allTeams, teamSize);
+    }
+
+    // Removes all teams larger than the specified size, iterates from the end of the list to find the boundary
+    private List<Team> removeLargerTeams(List<Team> teams, int maxValue) {
         for (int i = teams.size() - 1; i >= 0; i--) {
             if (teams.get(i).getSize() <= maxValue) {
                 return teams.subList(0, i+1);
@@ -219,7 +232,9 @@ public class UserGraph {
         return new ArrayList<>();
     }
 
+
     private List<Team> findInfectList(List<Team> teams, int desiredUsersCount) {
+        // An inner class to hold a node to aid the algorithm
         class SearchNode {
             int sum;
             List<Team> teams;
@@ -248,34 +263,37 @@ public class UserGraph {
             }
         }
 
-        SearchNode nodes[] = new SearchNode[desiredUsersCount];
+        SearchNode totals[] = new SearchNode[desiredUsersCount];
+        // For each team in the list, add its size to any existing size we can already reach.
+        // Stop if we can reach the goal
         for (Team team : teams) {
-            for (int i = 0; i < nodes.length; i++) {
-                SearchNode currentNode = nodes[i];
+            SearchNode tempTotals[] = totals.clone();  // Avoid adding to what we create on this run
+            for (SearchNode currentNode : tempTotals) {
+                // If the node of the current size exists, add the current team's size to it
                 if (currentNode != null) {
                     int newSize = currentNode.getSum() + team.getSize();
                     if (newSize == desiredUsersCount) {
                         currentNode.addTeam(team);
                         return currentNode.getTeams();
-                    }
-                    else if (newSize <= desiredUsersCount && nodes[newSize] == null) {
+                    } else if (newSize < desiredUsersCount && tempTotals[newSize] == null) {
                         SearchNode newNode = new SearchNode(currentNode);
                         newNode.addTeam(team);
-                        nodes[newSize] = newNode;
-                    }
-                    else {
+                        totals[newSize] = newNode;
+                    } else {
                         // There's already a way to sum to this. No need to recompute
                     }
                 }
             }
-            nodes[team.getSize()] = new SearchNode(team);
+            assert(team.getSize() < desiredUsersCount);
+            totals[team.getSize()] = new SearchNode(team);
         }
         return null;
     }
 
+    // Given a list of teams, runs total infection on each of the teams.
     private void infectTeams(List<Team> toInfect, Version newVersion) {
         for (Team team : toInfect) {
-            totalInfection(team.getTeamMembers().get(0), newVersion);
+            totalInfection(team, newVersion);
         }
     }
 }
