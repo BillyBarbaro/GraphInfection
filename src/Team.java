@@ -23,6 +23,7 @@ public class Team {
         return teamMembers.size();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof Team) {
             return ((Team) o).getTeamMembers().equals(this.getTeamMembers());

@@ -1,8 +1,11 @@
+/*
+    Represents a software version for the project.
+ */
 public class Version implements Comparable<Version> {
 
-    private Integer majorNumber;
-    private Integer minorNumber;
-    private Integer revisionNumber;
+    private final Integer majorNumber;
+    private final Integer minorNumber;
+    private final Integer revisionNumber;
 
     public Version(Integer majorNumber, Integer minorNumber, Integer revisionNumber) {
         this.majorNumber = majorNumber;
@@ -10,6 +13,7 @@ public class Version implements Comparable<Version> {
         this.revisionNumber = revisionNumber;
     }
 
+    // For creating copies of Version
     public Version(Version version) {
         majorNumber = version.getMajorNumber();
         minorNumber = version.getMinorNumber();
@@ -62,5 +66,10 @@ public class Version implements Comparable<Version> {
         else {
             return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        return majorNumber + "." + minorNumber + "." + revisionNumber;
     }
 }

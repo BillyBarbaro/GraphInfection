@@ -134,10 +134,12 @@ public class User {
         coaches.remove(coach);
     }
 
+    @Override
     public String toString() {
         return userName;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof User) {
             return ((User) o).getUserName().equals(this.getUserName());
