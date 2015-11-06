@@ -111,10 +111,11 @@ public class BulkTest {
         }
     }
 
+    // Find the ratio for each coach's students running alternate versions.
     private static void gatherClassData(ArrayList<Double> alternateVersionRatio, Version newVersion, User coach) {
         int upgraded = countUsersWithVersion(newVersion, coach.getStudents());
         if (coach.getStudents().size() != 0) {
-            /* Determine what version the majority of the class is running and calcuate the ratio of the class on the
+            /* Determine what version the majority of the class is running and calculate the ratio of the class on the
                 alternate version
             */
             if (upgraded > coach.getStudents().size() / 2) {
