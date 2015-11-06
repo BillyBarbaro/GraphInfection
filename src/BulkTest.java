@@ -22,30 +22,43 @@ public class BulkTest {
         return rand.nextInt((max - min) + 1) + min;
     }
 
-    private static void addTeamToGraph(UserGraph graph, int teamNumber) {
+    private static void addRandomTeamToGraph(UserGraph graph, int teamNumber) {
+        User[] coaches = addCoachesToGraph(graph, teamNumber);
+        addStudentsToGraph(graph, teamNumber, coaches);
+    }
+
+    private static User[] addCoachesToGraph(UserGraph graph, int teamNumber) {
         int numberOfCoaches = getRandom(MIN_NUMBER_COACHES, MAX_NUMBER_COACHES);
         User coaches[] = new User[numberOfCoaches];
         for (int i = 0; i < numberOfCoaches; i++) {
             coaches[i] = new User.Builder().build("Coach" + teamNumber + "_" + i);
             graph.addUser(coaches[i]);
         }
+        return coaches;
+    }
 
+    private static void addStudentsToGraph(UserGraph graph, int teamNumber, User[] coaches) {
         int numberOfStudents = getRandom(MIN_NUMBER_STUDENTS, MAX_NUMBER_STUDENTS);
         for (int i = 0; i < numberOfStudents; i++) {
             User student = new User.Builder().build("Student" + teamNumber + "_" + i);
-            int studentCoachCount =  getRandom(MIN_NUMBER_COACHES_FOR_STUDENT, MAX_NUMBER_COACHES_FOR_STUDENT);
-            for (int j = 0; j < studentCoachCount; j++) {
-                student.addCoach(coaches[getRandom(0, numberOfCoaches - 1)]);
-            }
+            addCoachesToStudent(coaches, student);
             graph.addUser(student);
+        }
+    }
+
+    private static void addCoachesToStudent(User[] coaches, User student) {
+        int studentCoachCount =  getRandom(MIN_NUMBER_COACHES_FOR_STUDENT, MAX_NUMBER_COACHES_FOR_STUDENT);
+        for (int j = 0; j < studentCoachCount; j++) {
+            student.addCoach(coaches[getRandom(0, coaches.length - 1)]);
         }
     }
 
     public static void main(String args[]) {
         UserGraph testGraph = new UserGraph.Builder().build();
 
+        // Adds the specified number of random teams to the graph
         for (int i = 0; i < NUMBER_OF_TEAMS; i++) {
-            addTeamToGraph(testGraph, i);
+            addRandomTeamToGraph(testGraph, i);
         }
 
         ArrayList<Team> teams = testGraph.findTeams();
