@@ -1,26 +1,12 @@
 import java.util.*;
 
+/*
+    Graph holding/representing the relations between all users of the application
+ */
 public class UserGraph {
 
-    public static class Builder {
-        private HashMap<String, UserNode> userNodes = new HashMap<>();
-
-        public Builder addUser(User user) {
-            if (user != null && !userNodes.containsKey(user.getUserName())) {
-                userNodes.put(user.getUserName(), new UserNode(user));
-            }
-            return this;
-        }
-
-        public HashMap<String, UserNode> getUserNodes() {
-            return new HashMap<>(userNodes);
-        }
-
-        public UserGraph build() {
-            return new UserGraph(this);
-        }
-    }
-
+    /* Inner class to hold instances in the graph.  Allows us to add attributes to keep track of properties
+    internal to the graph */
     private static class UserNode {
         private final User user;
         private boolean hasTeam;
@@ -42,12 +28,34 @@ public class UserGraph {
         }
     }
 
+    // Builder pattern to make it easier to add initial users to the graph.
+    public static class Builder {
+        private HashMap<String, UserNode> userNodes = new HashMap<>();
+
+        public Builder addUser(User user) {
+            if (user != null && !userNodes.containsKey(user.getUserName())) {
+                userNodes.put(user.getUserName(), new UserNode(user));
+            }
+            return this;
+        }
+
+        public HashMap<String, UserNode> getUserNodes() {
+            return new HashMap<>(userNodes);
+        }
+
+        public UserGraph build() {
+            return new UserGraph(this);
+        }
+    }
+
+    // Map Username to the instance of the user.
     private HashMap<String, UserNode> userNodes;
 
     private UserGraph(Builder userGraphBuilder) {
         userNodes = userGraphBuilder.getUserNodes();
     }
 
+    // Return a map of Usernames -> Users
     public HashMap<String, User> getUsers() {
         HashMap<String, User> users = new HashMap<>();
         for (String userName : userNodes.keySet()) {
@@ -56,6 +64,7 @@ public class UserGraph {
         return users;
     }
 
+    // Add a previously non-existant user to the graph
     public void addUser(User user) {
         if (user != null && !userNodes.containsKey(user.getUserName())) {
             userNodes.put(user.getUserName(), new UserNode(user));
@@ -68,6 +77,7 @@ public class UserGraph {
         }
     }
 
+    // Return the user with the specified username
     public User getUser(String username) {
         return userNodes.get(username).getUser();
     }
@@ -76,41 +86,66 @@ public class UserGraph {
         return userNodes.containsKey(user.getUserName());
     }
 
-    void updateQueue(User currentUser, Queue<User> queue) {
-        queue.addAll(currentUser.getCoaches());
-        queue.addAll(currentUser.getStudents());
-    }
-
-    void infectUser(User currentUser, Version newVersion) {
-        currentUser.setCurrentVersion(newVersion);
-    }
-
+    /* Total infection is a limited infection where we attempt to infect as many users as possible from a point.
+        Returns the number of users infected by the call.
+     */
     public int totalInfection(User userZero, Version newVersion) {
         return limitedInfection(userZero, newVersion, Integer.MAX_VALUE);
     }
 
+    /* Proceeds in waves out from the inital user until the threshold is met or there or no more connected users to
+        infect.  Returns the number of users it infected.
+    */
     public int limitedInfection(User userZero, Version newVersion, Integer desiredUsers) {
-        if (isUserInGraph(userZero)) {
+        if (isUserInGraph(userZero) && !userZero.getCurrentVersion().equals(newVersion)) {
             Integer infectCount = 0;
             Queue<User> infectQueue = new LinkedList<>();
             infectQueue.add(userZero);
 
             while (infectCount < desiredUsers && !infectQueue.isEmpty()) {
                 Queue<User> nextWave = new LinkedList<>();
-                for (User user : infectQueue) {
-                    if (isUserInGraph(user) && user.getCurrentVersion().compareTo(newVersion) != 0) {
-                        updateQueue(user, nextWave);
-                        infectUser(user, newVersion);
-                        infectCount++;
-                    }
-                }
+                infectCount += infectWave(newVersion, infectQueue, nextWave);
                 infectQueue = nextWave;
             }
             return infectCount;
         }
         else {
-            throw new IllegalArgumentException("The specified user is not in the graph");
+            if (!isUserInGraph(userZero)) {
+                throw new IllegalArgumentException("The specified user is not in the graph");
+            }
+            else {
+                throw new IllegalArgumentException("The specified user already has the given version");
+            }
         }
+    }
+
+    /*
+        Attempts to infect all users in the given queue with the given version.  Populates the nextWave queue with all
+        connected users, then returns the number of users that were infected.
+    */
+    private Integer infectWave(Version newVersion, Queue<User> infectQueue, Queue<User> nextWave) {
+        int infectCount = 0;
+        for (User user : infectQueue) {
+            // This could be changed if you want newer users to not be downgraded.
+            if (isUserInGraph(user) && user.getCurrentVersion().compareTo(newVersion) != 0) {
+                updateQueue(user, nextWave);
+                infectUser(user, newVersion);
+                infectCount++;
+            }
+        }
+        return infectCount;
+    }
+
+    // Given a user and a queue, adds all connected users to the queue.
+    void updateQueue(User currentUser, Queue<User> queue) {
+        queue.addAll(currentUser.getCoaches());
+        queue.addAll(currentUser.getStudents());
+    }
+
+    // Used to give the specified version of the app to the user.
+    void infectUser(User currentUser, Version newVersion) {
+        currentUser.setCurrentVersion(newVersion);
+        // Add other infection code here as needed.
     }
 
     private void resetTeams() {
