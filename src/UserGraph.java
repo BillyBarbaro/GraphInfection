@@ -154,6 +154,22 @@ public class UserGraph {
         }
     }
 
+    // Finds all the teams (connected components) within the graph of users.
+    public ArrayList<Team> findTeams() {
+        resetTeams();
+        ArrayList<Team> teams = new ArrayList<>();
+        /* Loop through each node, if it has not yet been put in a team, we create a team and determine all members
+            of the team
+        */
+        for (UserNode node : userNodes.values()) {
+            if (!node.hasTeam()) {
+                teams.add(createTeam(node.getUser()));
+            }
+        }
+        return teams;
+    }
+
+    // Creates a team by iterating over all the users connected to the given user.
     private Team createTeam(User firstUser) {
         Team team = new Team();
 
@@ -171,15 +187,27 @@ public class UserGraph {
         return team;
     }
 
-    public ArrayList<Team> findTeams() {
-        resetTeams();
-        ArrayList<Team> teams = new ArrayList<>();
-        for (UserNode node : userNodes.values()) {
-            if (!node.hasTeam()) {
-                teams.add(createTeam(node.getUser()));
-            }
+    public boolean totalInfectionExact(Version newVersion, int desiredUsersCount) {
+        ArrayList<Team> allTeams = findTeams();
+        Collections.sort(allTeams, (team1, team2) -> team1.getSize() - team2.getSize());
+        List<Team> teams = removeLargerValues(allTeams, desiredUsersCount);
+
+        // The trivial case where each individual team is larger than the desired number of infections
+        if (teams.size() == 0) {
+            return false;
         }
-        return teams;
+
+        // The trivial case where there is a team of the desired size.
+        if (teams.get(teams.size() - 1).getSize() == desiredUsersCount) {
+            totalInfection(teams.get(teams.size() - 1).getTeamMembers().get(0), newVersion);
+            return true;
+        }
+
+        List<Team> toInfect = findInfectList(teams, desiredUsersCount);
+        if (toInfect != null) {
+            infectTeams(toInfect, newVersion);
+        }
+        return toInfect != null;
     }
 
     private List<Team> removeLargerValues(List<Team> teams, int maxValue) {
@@ -249,28 +277,5 @@ public class UserGraph {
         for (Team team : toInfect) {
             totalInfection(team.getTeamMembers().get(0), newVersion);
         }
-    }
-
-    public boolean totalInfectionExact(Version newVersion, int desiredUsersCount) {
-        ArrayList<Team> allTeams = findTeams();
-        Collections.sort(allTeams, (team1, team2) -> team1.getSize() - team2.getSize());
-        List<Team> teams = removeLargerValues(allTeams, desiredUsersCount);
-
-        // The trivial case where each individual team is larger than the desired number of infections
-        if (teams.size() == 0) {
-            return false;
-        }
-
-        // The trivial case where there is a team of the desired size.
-        if (teams.get(teams.size() - 1).getSize() == desiredUsersCount) {
-            totalInfection(teams.get(teams.size() - 1).getTeamMembers().get(0), newVersion);
-            return true;
-        }
-
-        List<Team> toInfect = findInfectList(teams, desiredUsersCount);
-        if (toInfect != null) {
-            infectTeams(toInfect, newVersion);
-        }
-        return toInfect != null;
     }
 }
